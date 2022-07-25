@@ -14,6 +14,22 @@ app.use(session({secret : '비밀 코드', resave: true, saveUninitialized: fals
 app.use(passport.initialize());
 app.use(passport.session());
 require('dotenv').config();
+let multer = require('multer');
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './public/img')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname)
+  },
+  filefilter : function(req, file, cb){
+
+  },
+  limits: {
+    
+  }
+});
+var upload = multer({ storage: storage });
 
 app.use('/shop', require('./routes/shop.js'));
 app.use('/board/sub', require('./routes/board.js'));
@@ -185,3 +201,14 @@ app.get('/search',(req, res)=>{
   });
 });
 
+app.get('/upload', (req, res)=>{
+  res.render('upload');
+});
+
+app.post('/upload',upload.array('profile', 10),(req, res)=>{
+  res.send('업로드 완료')
+});
+
+app.get('/image/:imgName',(req, res)=>{
+  res.sendFile(__dirname + '/public/img/' + req.params.imgName);
+});
