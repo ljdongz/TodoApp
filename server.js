@@ -218,8 +218,8 @@ app.post('/chatroom', loginConfirm, (req, res)=>{
   var chatTitle
   db.collection('login').findOne(ObjectId(req.body.receiveId), (err, result)=>{
     if (err) return console.log(err);
-    chatTitle = result.id + "님과의 대화";
-    
+    chatTitle = result.id + "의 채팅방";
+
     var data = {
       title : chatTitle,
       member : [ObjectId(req.body.receiveId), req.user._id],
@@ -236,3 +236,19 @@ app.get('/chat', (req, res)=>{
     res.render('chat', {data : result});
   });
 });
+
+app.post('/message', loginConfirm, function(req, res){
+  var data = {
+    chatroomId : req.body.chatroomId,
+    content : req.body.content,
+    userid : req.user._id,
+    date : new Date()
+  }
+  db.collection('message').insertOne(data).then((err, result)=>{
+    if (err) return console.log(err);
+    console.log('저장됨');
+    res.redirect('/chat');
+  }).catch((err)=>{
+    console.log(err);
+  });
+})

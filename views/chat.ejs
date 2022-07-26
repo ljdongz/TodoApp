@@ -20,7 +20,7 @@
         <div class="col-3">
           <ul class="list-group chat-list">
             <% for (var i = 0; i < data.length; i++){ %>
-            <li class="list-group-item" data-id="">
+            <li class="list-group-item" data-id="<%= data[i]._id %>">
               <h6><%= data[i].title %></h6>
               <h6 class="text-small">create at : <%= data[i].date.toLocaleDateString() %></h6>
               <h6 class="text-small">to : <%= data[i].member[0] %></h6>
@@ -47,6 +47,25 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+    <script>
+      var chatroomId;
+      $('.list-group-item').click(function(){
+        $(this).css('background-color','#eee')
+        chatroomId = this.dataset.id;
+      });
+
+      $('#send').click(function(){
+        var content = $('#chat-input').val();
+        var outputData = {
+          chatroomId : chatroomId,
+          content : content,
+        }
+        $.post('/message', outputData).then(()=>{
+
+        });
+      })
+    </script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
