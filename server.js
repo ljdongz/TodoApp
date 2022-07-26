@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const { ObjectId } = require('mongodb');
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 const methodOverride = require('method-override');
@@ -211,4 +212,27 @@ app.post('/upload',upload.array('profile', 10),(req, res)=>{
 
 app.get('/image/:imgName',(req, res)=>{
   res.sendFile(__dirname + '/public/img/' + req.params.imgName);
+});
+
+app.post('/chatroom', loginConfirm, (req, res)=>{
+  var chatTitle
+  db.collection('login').findOne(ObjectId(req.body.receiveId), (err, result)=>{
+    if (err) return console.log(err);
+    chatTitle = result.id + "님과의 대화";
+    
+    var data = {
+      title : chatTitle,
+      member : [ObjectId(req.body.receiveId), req.user._id],
+      date : new Date()
+    }
+    db.collection('chatroom').insertOne(data).then((result)=>{
+    });
+  });
+});
+
+app.get('/chat', (req, res)=>{
+  db.collection('chatroom').find({member : req.user._id}).toArray().then((result)=>{
+    console.log(result);
+    res.render('chat', {data : result});
+  });
 });
