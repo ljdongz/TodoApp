@@ -1,5 +1,8 @@
 const express = require('express');
 const app = express();
+const http = require('http').createServer(app);
+const {Server} = require('socket.io')
+const io = new Server(http);
 const { ObjectId } = require('mongodb');
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -39,7 +42,7 @@ var db;
 MongoClient.connect(process.env.DB_URL, function(err, client){
   if (err) return console.log(err);
   db = client.db('todoapp');
-  app.listen(process.env.PORT, function(){
+  http.listen(process.env.PORT, function(){
     console.log('Server is running on port 8080');
   });
 });
@@ -264,5 +267,36 @@ app.get('/message/:id', loginConfirm, function(req, res){
     console.log(JSON.stringify(result));
     res.write('event: test\n');
     res.write('data: ' + JSON.stringify(result) + '\n\n');
+  });
+  const pipeline = [
+    { $match: { 'fullDocument.chatroomId' : req.params.id } }
+  ];
+  const changeStream = db.collection('message').watch(pipeline);
+  changeStream.on('change', (result) => {
+      console.log(result.fullDocument);
+      res.write('event: test\n');
+      res.write('data: ' + JSON.stringify([result.fullDocument]) + '\n\n');
+  });
+});
+
+
+
+app.get('/socket', (req, res)=>{
+  res.render('socket');
+})
+
+io.on('connection', function(socket){
+
+  socket.on('joinRoom',function(data){
+    socket.join('room1');
+  })
+
+  socket.on('room1-send',function(data){
+    io.to('room1').emit('broadcast',data);
+  })
+
+  socket.on('user-send', function(data){
+    console.log(data);
+    io.emit('broadcast', 'io-emit');
   });
 });
