@@ -252,3 +252,17 @@ app.post('/message', loginConfirm, function(req, res){
     console.log(err);
   });
 })
+
+app.get('/message/:id', loginConfirm, function(req, res){
+  res.writeHead(200,{
+    'Connection': 'keep-alive',
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache'
+  });
+
+  db.collection('message').find({chatroomId : req.params.id}).toArray().then((result)=>{
+    console.log(JSON.stringify(result));
+    res.write('event: test\n');
+    res.write('data: ' + JSON.stringify(result) + '\n\n');
+  });
+});
